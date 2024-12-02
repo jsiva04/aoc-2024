@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <cmath> // for abs()
 
 void split(std::string& line, std::vector<std::string>& words, char delim) {
     std::stringstream ss(line);
@@ -14,7 +15,6 @@ void split(std::string& line, std::vector<std::string>& words, char delim) {
 
 int main() {
     std::string line;
-
     int total = 0;
 
     while (std::getline(std::cin, line)) {
@@ -23,47 +23,33 @@ int main() {
         }
 
         std::vector<std::string> words;
-
         split(line, words, ' ');
 
-        // std::cout << std::to_string(stoi(words[0]) + stoi(words[1])) << std::endl;
-
         try {
-            bool up;
 
-            if (stoi(words[0]) > stoi(words[1])) {
-                up = false;
-            } else if (stoi(words[0]) == stoi(words[1])) {
-                total++;
-                continue;
-            } else {
-                up = true;
-            }
-                
-            for (size_t i = 1; i < words.size() - 1; i++) {
-                if (up == true && stoi(words[i]) > stoi(words[i + 1])) {
-                    total++;
-                    break;
-                }
+            if (words.size() < 2) continue;
 
-                if (up == false && stoi(words[i]) < stoi(words[i + 1])) {
-                    total++;
-                    break;
-                }
+            bool up = false, valid = true;
+            int first_diff = stoi(words[1]) - stoi(words[0]);
+            
+            if (first_diff > 0) up = true;
+            else if (first_diff < 0) up = false;
+            else valid = false;
 
-                if (abs(stoi(words[i + 1]) - stoi(words[i])) > 3 || abs(stoi(words[i + 1]) - stoi(words[i])) < 1) {
-                    total++;
-                    break;
+            for (size_t i = 0; i < words.size() - 1 && valid; i++) {
+                int diff = stoi(words[i + 1]) - stoi(words[i]);
+
+                if ((up && diff <= 0) || (!up && diff >= 0) || abs(diff) < 1 || abs(diff) > 3) {
+                    valid = false;
                 }
             }
-        } catch (const std::invalid_argument& e) {
-            std::cerr << "Invalid number format in input: " << e.what() << std::endl;
-        } catch (const std::out_of_range& e) {
-            std::cerr << "Number out of range in input: " << e.what() << std::endl;
+
+            if (valid) total++;
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing input: " << e.what() << std::endl;
         }
     }
 
-    std::cout << std::to_string(total) << std::endl;
-
-    return total;
+    std::cout << total << std::endl;
+    return 0;
 }
